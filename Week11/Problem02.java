@@ -2,52 +2,77 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.week12;
-
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Scanner;
+package week11;
 
 /**
  *
  * @author User
  */
-class Checker implements Comparator<Player> {
+public class Problem02{
 
-    public int compare(Player a, Player b) {
-        if (a.score != b.score) {
-            return b.score - a.score;
+    private int balance;
+    private boolean open = false;
+
+    synchronized void open() throws BankAccountActionInvalidException {
+        if (open) {
+            throw new BankAccountActionInvalidException("Account already open");
         }
 
-        return a.name.compareTo(b.name);
+        open = true;
+        balance = 0;
     }
-}
 
-class Player{
-    String name;
-    int score;
-    
-    Player(String name, int score){
-        this.name = name;
-        this.score = score;
+    synchronized void close() throws BankAccountActionInvalidException {
+        if (!open) {
+            throw new BankAccountActionInvalidException("Account not open");
+        }
+
+        open = false;
     }
-}
-public class Problem02 {
-    public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        int n = scan.nextInt();
 
-        Player[] player = new Player[n];
-        Checker checker = new Checker();
-        
-        for(int i = 0; i < n; i++){
-            player[i] = new Player(scan.next(), scan.nextInt());
+    synchronized int getBalance() throws BankAccountActionInvalidException {
+        if (!open) {
+            throw new BankAccountActionInvalidException("Account closed");
         }
-        scan.close();
-     
-        Arrays.sort(player, checker);
-        for(int i = 0; i < player.length; i++){
-            System.out.printf("%s %s\n", player[i].name, player[i].score);
+
+        return balance;
+    }
+
+    synchronized void deposit(int amount)
+            throws BankAccountActionInvalidException {
+
+        if (!open) {
+            throw new BankAccountActionInvalidException("Account closed");
         }
-    } 
+
+        if (amount < 0) {
+            throw new BankAccountActionInvalidException(
+                "Cannot deposit or withdraw negative amount"
+            );
+        }
+
+        balance += amount;
+    }
+
+    synchronized void withdraw(int amount)
+            throws BankAccountActionInvalidException {
+
+        if (!open) {
+            throw new BankAccountActionInvalidException("Account closed");
+        }
+
+        if (amount < 0) {
+            throw new BankAccountActionInvalidException(
+                "Cannot deposit or withdraw negative amount"
+            );
+        }
+
+        if (amount > balance) {
+            throw new BankAccountActionInvalidException(
+                "Cannot withdraw more money than is currently in the account"
+            );
+        }
+
+        balance -= amount;
+    }
 }
